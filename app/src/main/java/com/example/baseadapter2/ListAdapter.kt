@@ -1,18 +1,19 @@
 package com.example.baseadapter2
 
 import android.app.Dialog
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doOnTextChanged
-import com.google.android.material.textfield.TextInputLayout
+import com.example.baseadapter2.databinding.UpdateviewBinding
 
-class ListAdapter(private var list:ArrayList<Student>,private var alertDialog: AlertDialog.Builder,private var customUpdate:Dialog ) : BaseAdapter() {
+class ListAdapter(private var context : Context, private var list:ArrayList<Student>) : BaseAdapter() {
+    private lateinit var customBinding: UpdateviewBinding
     override fun getCount(): Int {
         return list.size
     }
@@ -26,6 +27,7 @@ class ListAdapter(private var list:ArrayList<Student>,private var alertDialog: A
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+
         var view = convertView
         if(view == null) view = LayoutInflater.from(parent?.context).inflate(R.layout.customview,parent,false)
         view?.findViewById<TextView>(R.id.Name)?.text = list[position].name
@@ -33,14 +35,12 @@ class ListAdapter(private var list:ArrayList<Student>,private var alertDialog: A
         view?.findViewById<TextView>(R.id.Subject)?.text = list[position].subject
         val delBtn = view?.findViewById<Button>(R.id.delete)
         val updateBtn = view?.findViewById<Button>(R.id.update)
-        val etName = customUpdate.findViewById<EditText>(R.id.etName)
-        val etNameL = customUpdate.findViewById<TextInputLayout>(R.id.textInputLayout1)
-        val etRollN = customUpdate.findViewById<EditText>(R.id.etRollNo)
-        val etRollL = customUpdate.findViewById<TextInputLayout>(R.id.textInputLayout2)
-        val etSubject = customUpdate.findViewById<EditText>(R.id.etSubject)
-        val etSubjectL = customUpdate.findViewById<TextInputLayout>(R.id.textInputLayout3)
-        val positiveBtn =  customUpdate.findViewById<TextView>(R.id.positiveButton)
+
         delBtn?.setOnClickListener {
+            val alertDialog = AlertDialog.Builder(context)
+            alertDialog.setTitle("Confirmation!")
+            alertDialog.setMessage("Do you want to delete this..")
+            alertDialog.setCancelable(false)
             alertDialog.setPositiveButton("Yes"){_,_->
                 list.removeAt(position)
                 notifyDataSetChanged()
@@ -49,44 +49,44 @@ class ListAdapter(private var list:ArrayList<Student>,private var alertDialog: A
             }
             alertDialog.show()
         }
+
         updateBtn?.setOnClickListener {
+            val layoutInflater = LayoutInflater.from(context)
+            customBinding = UpdateviewBinding.inflate(layoutInflater)
+            val customUpdate = Dialog(context)
+            customUpdate.setContentView(customBinding.root)
             customUpdate.show()
-            etName?.setText(list[position].name)
-            etRollN.setText(list[position].rollNo)
-            etSubject?.setText(list[position].subject)
-        }
-            positiveBtn.setOnClickListener {
-                if (etName.text.trim().isEmpty()) {
-                    etNameL.error = "Enter Name.."
-                }
-                else if(etRollN.text.trim().isEmpty()){
-                    etRollL.error = "Enter Roll No."
-                }
-                else if (etSubject?.text?.trim()?.isEmpty()!!) {
-                    etSubjectL.error = "Enter Subject.."
+            customBinding.etName.setText(list[position].name)
+            customBinding.etRollNo.setText(list[position].rollNo)
+            customBinding.etSubject.setText(list[position].subject)
+
+            customBinding.positiveButton.setOnClickListener {
+                if (customBinding.etName.text.trim().isEmpty()) {
+                    customBinding.textInputLayout1.error = "Enter Name.."
+                } else if (customBinding.etRollNo.text.trim().isEmpty()) {
+                    customBinding.textInputLayout2.error = "Enter Roll No."
+                } else if (customBinding.etSubject.text.trim().isEmpty()) {
+                    customBinding.textInputLayout3.error = "Enter Subject.."
                 } else {
                     list[position] = Student(
-                        etName.text.toString().trim(),
-                        etRollN.text.toString().trim(),
-                        etSubject.text.toString().trim()
+                        customBinding.etName.text.toString().trim(),
+                        customBinding.etRollNo.text.toString().trim(),
+                        customBinding.etSubject.text.toString().trim()
                     )
                     notifyDataSetChanged()
                     customUpdate.dismiss()
-                    etName.clearFocus()
-                    etRollN.clearFocus()
-                    etSubject.clearFocus()
                 }
             }
-                etName.doOnTextChanged { _, _, _, _ ->
-                    etNameL.isErrorEnabled = false
-                }
-                etRollN.doOnTextChanged { _, _, _, _ ->
-                    etRollL.isErrorEnabled = false
-                }
-                etSubject.doOnTextChanged { _, _, _, _ ->
-                    etSubjectL.isErrorEnabled = false
-                }
-
+            customBinding.etName.doOnTextChanged { _, _, _, _ ->
+                customBinding.textInputLayout1.isErrorEnabled = false
+            }
+            customBinding.etRollNo.doOnTextChanged { _, _, _, _ ->
+                customBinding.textInputLayout2.isErrorEnabled = false
+            }
+            customBinding.etSubject.doOnTextChanged { _, _, _, _ ->
+                customBinding.textInputLayout3.isErrorEnabled = false
+            }
+        }
         return view!!
     }
 }

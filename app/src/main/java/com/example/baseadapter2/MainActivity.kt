@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -28,34 +27,27 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        arrayList = arrayListOf(Student("Robin","1","Maths"))
+        arrayList = ArrayList()
+        arrayList.add(Student("Robin","1","Maths"))
         arrayList.add(Student("Ram","2","English"))
-        addBinding = AdddialogBinding.inflate(layoutInflater)
-        val addDialog = Dialog(this)
-        addDialog.setContentView(addBinding.root)
+
         binding.FAB.setOnClickListener {
-            addBinding.textInputLayout1.isErrorEnabled = false
-            addBinding.etName.text = null
-            addBinding.etName.clearFocus()
-            addBinding.textInputLayout2.isErrorEnabled = false
-            addBinding.etRoll.text = null
-            addBinding.etRoll.clearFocus()
-            addBinding.textInputLayout3.isErrorEnabled = false
-            addBinding.etSubject.text = null
-            addBinding.etSubject.clearFocus()
+            addBinding = AdddialogBinding.inflate(layoutInflater)
+            val addDialog = Dialog(this)
+            addDialog.setContentView(addBinding.root)
             addBinding.positiveButton.setOnClickListener {
-                if(addBinding.etName.text?.trim()?.isEmpty()!!){
+                if(addBinding.etName.text.trim().isEmpty()){
                     addBinding.textInputLayout1.error = "Enter Name.."
                 }
-                else if(addBinding.etRoll.text?.trim()?.isEmpty()!!){
+                else if(addBinding.etRoll.text.trim().isEmpty()){
                     addBinding.textInputLayout2.error = "Enter Roll Number.."
                 }
-                else if(addBinding.etSubject.text?.trim()?.isEmpty()!!){
+                else if(addBinding.etSubject.text.trim().isEmpty()){
                     addBinding.textInputLayout3.error = "Enter Subject.."
                 }
                 else{
-                    arrayList.add(Student(addBinding.etName.text?.trim().toString(),
-                        addBinding.etRoll.text?.trim().toString(),addBinding.etSubject.text?.trim().toString()))
+                    arrayList.add(Student(addBinding.etName.text.trim().toString(),
+                        addBinding.etRoll.text.trim().toString(),addBinding.etSubject.text.trim().toString()))
                     listAdapter.notifyDataSetChanged()
                     Toast.makeText(this@MainActivity,"New Item Added..", Toast.LENGTH_SHORT).show()
                     addDialog.dismiss()
@@ -74,14 +66,8 @@ class MainActivity : AppCompatActivity() {
             val window = addDialog.window
             window?.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
         }
-            val customUpdate = Dialog(this)
-            customUpdate.setContentView(R.layout.updateview)
-            val alertDialog = AlertDialog.Builder(this)
-            alertDialog.setTitle("Confirmation!")
-            alertDialog.setMessage("Do you want to delete this..")
-            alertDialog.setCancelable(false)
 
-        listAdapter = ListAdapter(arrayList,alertDialog,customUpdate)
+        listAdapter = ListAdapter(this,arrayList)
         binding.listView.adapter = listAdapter
     }
 }
